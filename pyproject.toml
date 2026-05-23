@@ -1,0 +1,22 @@
+[project]
+name = "eda-mcp"
+version = "0.0.1"
+description = "MCP server exposing open-source EDA tools (Yosys, Icarus Verilog, Verilator, waveform-cli) to LLM agents."
+requires-python = ">=3.11"
+dependencies = [
+    "mcp[cli]>=1.0",
+]
+
+[project.scripts]
+eda-mcp-server = "server.main:main"
+eda-mcp-smoke = "smoke_test:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+py-modules = ["smoke_test"]
+
+[tool.setuptools.packages.find]
+include = ["server*"]
