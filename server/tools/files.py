@@ -1,6 +1,9 @@
 """Workspace file I/O tools — the LLM uses these to place source files."""
 from __future__ import annotations
 
+from typing import Annotated
+
+from pydantic import Field
 from mcp.server.fastmcp import FastMCP
 from mcp.types import ToolAnnotations
 
@@ -11,7 +14,9 @@ READ_ONLY = ToolAnnotations(readOnlyHint=True)
 
 def register(mcp: FastMCP) -> None:
     @mcp.tool(annotations=READ_ONLY)
-    def list_files(subdir: str = "") -> dict:
+    def list_files(
+        subdir: Annotated[str, Field(description='subdirectory to list (e.g. "src", "build"). Empty = workspace root')] = "",
+    ) -> dict:
         """List files inside the EDA workspace (Docker /workspace directory).
 
         This is the shared workspace where Verilog sources and build artifacts
@@ -32,7 +37,9 @@ def register(mcp: FastMCP) -> None:
         return {"subdir": subdir, "files": entries, "exists": True}
 
     @mcp.tool(annotations=READ_ONLY)
-    def read_file(path: str) -> dict:
+    def read_file(
+        path: Annotated[str, Field(description='workspace-relative file path (e.g. "src/counter.v")')],
+    ) -> dict:
         """Read a text file from the EDA workspace (Docker /workspace directory).
 
         Use this to read Verilog sources, build logs, or netlist outputs that
@@ -47,7 +54,10 @@ def register(mcp: FastMCP) -> None:
         return {"path": path, "content": full.read_text()}
 
     @mcp.tool()
-    def write_file(path: str, content: str) -> dict:
+    def write_file(
+        path: Annotated[str, Field(description='workspace-relative file path (e.g. "src/counter.v")')],
+        content: Annotated[str, Field(description="full file content to write")],
+    ) -> dict:
         """Write a text file to the EDA workspace (Docker /workspace directory).
 
         Use this to create or overwrite Verilog source files and testbenches

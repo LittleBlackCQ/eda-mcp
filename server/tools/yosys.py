@@ -1,8 +1,9 @@
 """Yosys synthesis tool."""
 from __future__ import annotations
 
-from typing import Literal
+from typing import Annotated, Literal
 
+from pydantic import Field
 from mcp.server.fastmcp import FastMCP
 
 from .. import shell, workspace
@@ -11,10 +12,10 @@ from .. import shell, workspace
 def register(mcp: FastMCP) -> None:
     @mcp.tool()
     def yosys_synth(
-        sources: list[str],
-        top: str,
-        target: Literal["verilog", "json"] = "verilog",
-        timeout_s: int = 120,
+        sources: Annotated[list[str], Field(description='workspace-relative paths to .v files (e.g. ["src/counter.v"])')],
+        top: Annotated[str, Field(description="name of the top-level module to synthesize")],
+        target: Annotated[Literal["verilog", "json"], Field(description="output format: 'verilog' for gate-level .v (default), 'json' for Yosys JSON netlist")] = "verilog",
+        timeout_s: Annotated[int, Field(description="max seconds before the process is killed (default 120)")] = 120,
     ) -> dict:
         """Synthesize Verilog sources into a gate-level netlist using Yosys.
 

@@ -1,6 +1,9 @@
 """Icarus Verilog compile + simulate tool."""
 from __future__ import annotations
 
+from typing import Annotated
+
+from pydantic import Field
 from mcp.server.fastmcp import FastMCP
 
 from .. import shell, workspace
@@ -9,9 +12,9 @@ from .. import shell, workspace
 def register(mcp: FastMCP) -> None:
     @mcp.tool()
     def iverilog_simulate(
-        sources: list[str],
-        top: str,
-        timeout_s: int = 30,
+        sources: Annotated[list[str], Field(description='workspace-relative .v files — must include both the design under test AND the testbench')],
+        top: Annotated[str, Field(description='the testbench module name (e.g. "tb_counter")')],
+        timeout_s: Annotated[int, Field(description="max seconds before the simulation is killed (default 30)")] = 30,
     ) -> dict:
         """Compile and simulate a Verilog testbench using Icarus Verilog.
 

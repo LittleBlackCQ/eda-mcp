@@ -1,6 +1,9 @@
 """Verilator lint tool (placeholder — extend with full simulation later)."""
 from __future__ import annotations
 
+from typing import Annotated
+
+from pydantic import Field
 from mcp.server.fastmcp import FastMCP
 from mcp.types import ToolAnnotations
 
@@ -10,9 +13,9 @@ from .. import shell, workspace
 def register(mcp: FastMCP) -> None:
     @mcp.tool(annotations=ToolAnnotations(readOnlyHint=True))
     def verilator_lint(
-        sources: list[str],
-        top: str,
-        timeout_s: int = 30,
+        sources: Annotated[list[str], Field(description="workspace-relative .v files to lint")],
+        top: Annotated[str, Field(description="the top-level module name")],
+        timeout_s: Annotated[int, Field(description="max seconds (default 30)")] = 30,
     ) -> dict:
         """Run static lint checks on Verilog sources using Verilator.
 
