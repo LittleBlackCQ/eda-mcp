@@ -14,9 +14,20 @@ def register(mcp: FastMCP) -> None:
         top: str,
         timeout_s: int = 30,
     ) -> dict:
-        """Lint Verilog sources with Verilator (--lint-only).
+        """Run static lint checks on Verilog sources using Verilator.
 
-        Returns verilator's diagnostic output. Non-zero returncode means lint errors.
+        Use this BEFORE simulation or synthesis to catch common issues:
+        unused signals, width mismatches, implicit wire declarations, and
+        coding style violations. Runs with -Wall for maximum diagnostics.
+
+        Args:
+            sources: workspace-relative .v files to lint.
+            top: the top-level module name.
+            timeout_s: max seconds (default 30).
+
+        Returns dict with:
+            returncode: 0 = clean, non-zero = lint errors found.
+            stdout/stderr: Verilator diagnostic messages (warnings and errors).
         """
         src_paths = [str(workspace.resolve(s)) for s in sources]
         result = shell.run_cmd(

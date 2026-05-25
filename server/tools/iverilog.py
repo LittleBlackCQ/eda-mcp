@@ -13,11 +13,25 @@ def register(mcp: FastMCP) -> None:
         top: str,
         timeout_s: int = 30,
     ) -> dict:
-        """Compile and run a Verilog testbench with Icarus Verilog.
+        """Compile and simulate a Verilog testbench using Icarus Verilog.
 
-        sources: workspace-relative .v files (include the testbench).
-        top: top module to simulate (usually the testbench).
-        Returns vvp stdout (where $display lands) and the VCD path if produced.
+        Use this to run functional simulation. The testbench should use
+        $display to print "TEST PASSED" or "TEST FAILED", and optionally
+        $dumpfile/$dumpvars to generate a VCD waveform for analysis.
+
+        Args:
+            sources: workspace-relative .v files — must include both the
+                     design under test AND the testbench.
+            top: the testbench module name (e.g. "tb_counter").
+            timeout_s: max seconds before the simulation is killed (default 30).
+
+        Returns dict with:
+            stage: 'compile' if compilation failed, 'run' if simulation ran.
+            vcd_path: workspace-relative path to the VCD file (e.g.
+                      "build/tb_counter/dump.vcd"), or null if no VCD was generated.
+            returncode: 0 on success.
+            stdout: simulation output ($display messages, pass/fail verdict).
+            stderr: compiler or runtime warnings/errors.
         """
         src_paths = [str(workspace.resolve(s)) for s in sources]
         out_dir = workspace.resolve(f"build/{top}")

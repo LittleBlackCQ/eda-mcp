@@ -16,12 +16,23 @@ def register(mcp: FastMCP) -> None:
         target: Literal["verilog", "json"] = "verilog",
         timeout_s: int = 120,
     ) -> dict:
-        """Synthesize Verilog to a gate-level netlist with Yosys.
+        """Synthesize Verilog sources into a gate-level netlist using Yosys.
 
-        sources: workspace-relative paths to .v files.
-        top: name of the top module.
-        target: 'verilog' (gate-level .v, default) or 'json' (Yosys JSON netlist).
-        Returns the output path under build/ plus yosys stdout/stderr.
+        Use this after writing Verilog source files to check synthesizability
+        or to inspect the gate-level structure.
+
+        Args:
+            sources: workspace-relative paths to .v files (e.g. ["src/counter.v"]).
+            top: name of the top-level module to synthesize.
+            target: output format — 'verilog' for gate-level .v (default),
+                    'json' for Yosys JSON netlist.
+            timeout_s: max seconds before the process is killed (default 120).
+
+        Returns dict with:
+            output_path: workspace-relative path to the netlist (e.g. "build/counter.v"),
+                         or null if synthesis failed.
+            returncode: 0 on success, non-zero on failure.
+            stdout/stderr: Yosys log output (warnings, cell counts, etc.).
         """
         src_paths = [str(workspace.resolve(s)) for s in sources]
         ext = "json" if target == "json" else "v"
