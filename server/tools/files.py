@@ -12,7 +12,16 @@ READ_ONLY = ToolAnnotations(readOnlyHint=True)
 def register(mcp: FastMCP) -> None:
     @mcp.tool(annotations=READ_ONLY)
     def list_files(subdir: str = "") -> dict:
-        """List files in the workspace (or a subdirectory). Paths are workspace-relative."""
+        """List files inside the EDA workspace (Docker /workspace directory).
+
+        This is the shared workspace where Verilog sources and build artifacts
+        live. Use this (not the host read_file) to see files available to EDA tools.
+
+        Args:
+            subdir: subdirectory to list (e.g. "src", "build"). Empty = workspace root.
+
+        Returns dict with files: list of {path, size} entries.
+        """
         root = workspace.resolve(subdir)
         if not root.exists():
             return {"subdir": subdir, "files": [], "exists": False}
@@ -24,7 +33,14 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool(annotations=READ_ONLY)
     def read_file(path: str) -> dict:
-        """Read a text file from the workspace."""
+        """Read a text file from the EDA workspace (Docker /workspace directory).
+
+        Use this to read Verilog sources, build logs, or netlist outputs that
+        were created by EDA tools. Paths are relative to /workspace.
+
+        Args:
+            path: workspace-relative file path (e.g. "src/counter.v").
+        """
         full = workspace.resolve(path)
         if not full.is_file():
             return {"path": path, "error": "not a file"}
@@ -32,7 +48,17 @@ def register(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def write_file(path: str, content: str) -> dict:
-        """Write a text file to the workspace. Creates parent directories."""
+        """Write a text file to the EDA workspace (Docker /workspace directory).
+
+        Use this to create or overwrite Verilog source files and testbenches
+        before running synthesis, simulation, or lint. Creates parent dirs.
+
+        Args:
+            path: workspace-relative file path (e.g. "src/counter.v").
+            content: full file content to write.
+
+        Returns dict with path and bytes written.
+        """
         full = workspace.resolve(path)
         full.parent.mkdir(parents=True, exist_ok=True)
         full.write_text(content)
