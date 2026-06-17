@@ -14,11 +14,17 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1
 
 # EDA toolchain
+#
+# make + g++ are required by Verilator's --binary flow: Verilator emits C++ and
+# then invokes make/g++ to build the simulation executable (e.g. RealBench's
+# verification Makefiles). Without them, --binary compilation fails.
 RUN apt-get update && apt-get install -y --no-install-recommends \
         yosys \
         iverilog \
         verilator \
         gtkwave \
+        make \
+        g++ \
         python3 \
         python3-pip \
         ca-certificates \
